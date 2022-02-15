@@ -2,6 +2,8 @@ import json
 
 from user import User
 
+from db import *
+
 # SEPARATOR = "<separator>"
 # EQUALITION = ":===:"
 
@@ -51,5 +53,19 @@ async def route_request(request, socket, server):
 
         await server.send_data_to_user(chats_data.encode("utf-8"), user)
         print(server.connected_users)
+
+    if data['oper'] == "reg":
+
+        s = get_session()
+
+        new_user = UserDB(username = data['username'], password = data['password'])
+        s.add(new_user)
+        s.flush()
+
+        user_data = json.dumps(new_user.to_object())
+
+        await server.send_data_to_socket(user_data.encode("utf-8"), socket)
+        s.commit()
+
 
     print(data)

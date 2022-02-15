@@ -39,6 +39,11 @@ class Server:
 
         await self.main_loop.sock_sendall(user.socket, data)
 
+    async def send_data_to_socket(self, data, socket):
+        data = data+'\n'.encode('utf-8')
+
+        await self.main_loop.sock_sendall(socket, data)
+
 
     async def accept_connections(self):
         while True:

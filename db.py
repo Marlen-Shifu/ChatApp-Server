@@ -8,7 +8,7 @@ engine = create_engine("sqlite:///db.sqlite", echo=False)
 Base = declarative_base()
 
 
-class User(Base):
+class UserDB(Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
@@ -59,21 +59,21 @@ def get_session():
 
 
 
-if __name__ == '__main__':
-    s = get_session()
-
-    test_user = User(username = 'testuser', password = '123456')
-    s.add(test_user)
-    s.flush()
-
-    test_chat = Chat(title = 'Chat1')
-    s.add(test_chat)
-    s.flush()
-
-    test_chat_member = ChatMember(user_id = test_user.id, chat_id = test_chat.id)
-    s.add(test_chat_member)
-
-    message = Message(sender_id = test_user.id, chat_id = test_chat.id, text = "QWERTYUIOP{{}KJHGFCVBN")
-    s.add(message)
-
-    s.commit()
+# if __name__ == '__main__':
+#     s = get_session()
+#
+#     test_user = User(username = 'testuser', password = '123456')
+#     s.add(test_user)
+#     s.flush()
+#
+#     test_chat = Chat(title = 'Chat1')
+#     s.add(test_chat)
+#     s.flush()
+#
+#     test_chat_member = ChatMember(user_id = test_user.id, chat_id = test_chat.id)
+#     s.add(test_chat_member)
+#
+#     message = Message(sender_id = test_user.id, chat_id = test_chat.id, text = "QWERTYUIOP{{}KJHGFCVBN")
+#     s.add(message)
+#
+#     s.commit()
