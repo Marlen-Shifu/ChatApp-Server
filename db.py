@@ -28,6 +28,12 @@ class Chat(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String(255))
 
+    def to_object(self):
+        return {
+            'id': self.id,
+            'title': self.title
+        }
+
 
 class ChatMember(Base):
     __tablename__ = 'chat_member'
@@ -36,6 +42,10 @@ class ChatMember(Base):
 
     user_id = Column(Integer)
     chat_id = Column(Integer)
+
+
+    def to_object(self):
+        return get_session().query(Chat).filter_by(id = self.chat_id).first().to_object()
 
 
 class Message(Base):
@@ -47,6 +57,15 @@ class Message(Base):
     chat_id = Column(Integer)
     send_time = Column(DateTime, server_default=func.now())
     text = Column(String)
+
+    def to_object(self):
+        return {
+            'id': self.id,
+            'sender_id': self.sender_id,
+            'chat_id': self.chat_id,
+            'send_time': self.send_time.isoformat(),
+            'text': self.text
+        }
 
 
 Base.metadata.create_all(engine)
