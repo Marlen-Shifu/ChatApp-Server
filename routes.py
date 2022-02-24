@@ -4,22 +4,6 @@ from user import User
 
 from db import *
 
-# SEPARATOR = "<separator>"
-# EQUALITION = ":===:"
-
-# def read_data(data):
-#     spliteds = data.decode("utf-8").split(SEPARATOR)
-#
-#     print(spliteds)
-#
-#     for_return = {}
-#     for splited in spliteds:
-#         print(splited)
-#         data = splited.split(EQUALITION)
-#         for_return[data[0]] = data[1]
-#
-#     return for_return
-
 
 def read_data(data):
     json_data = json.loads(data)
@@ -27,13 +11,30 @@ def read_data(data):
     return json_data
 
 
+def get_connected_user(server, username = None, socket = None):
+
+    if username == None and socket == None:
+        raise Exception("Must be given username or socket")
+
+    if username != None:
+        for user in server.connected_users:
+            if user.username == username:
+                return user
+        return None
+
+    elif socket != None:
+        for user in server.connected_users:
+            if user.socket == socket:
+                return user
+        return None
+
 async def route_request(request, socket, server):
 
     data = read_data(request)
 
     #-----------------------------------------------------------
     if data['oper'] == "login":
-        user = User(socket, "User")
+        user = User(socket, data['username'])
         server.add_login_user(user)
 
         chats_data = json.dumps(
@@ -83,6 +84,7 @@ async def route_request(request, socket, server):
         await server.send_data_to_socket(chat_data.encode("utf-8"), socket)
         s.commit()
 
+    # ---------------------------------------------------------------
     if data['oper'] == "join-chat":
 
         s = get_session()
@@ -98,7 +100,7 @@ async def route_request(request, socket, server):
 
         # print(s.query(Chat).all())
 
-
+    # ---------------------------------------------------------------
     if data['oper'] == "send-message":
 
         s = get_session()
@@ -107,10 +109,22 @@ async def route_request(request, socket, server):
         s.add(new_object)
         s.flush()
 
-        data = json.dumps(new_object.to_object())
+        data_to = json.dumps(new_object.to_object())
 
-        await server.send_data_to_socket(data.encode("utf-8"), socket)
+        await server.send_data_to_socket(data_to.encode("utf-8"), socket)
         s.commit()
 
+        chat_users = s.query(ChatMember).filter_by(chat_id = int(data['chat_id'])).all()
+        print(chat_users)
+
+        for user in chat_users:
+            userdb = s.query(UserDB).filter_by(id = user.user_id).first()
+            print(userdb.username)
+
+            connected_user = get_connected_user(server, username=userdb.username)
+            print(connected_user)
+
+            if connected_user != None:
+                await server.send_data_to_socket(data_to.encode("utf-8"), connected_user.socket)
 
     print(data)
