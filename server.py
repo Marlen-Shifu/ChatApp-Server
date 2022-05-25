@@ -52,9 +52,6 @@ class Server:
 
             self.connected_sockets.append(user_socket)
 
-            user_socket.send('You connected\n'.encode('utf-8'))
-
-
             self.main_loop.create_task(self.listen_client(user_socket))
 
 
