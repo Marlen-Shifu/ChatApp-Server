@@ -41,12 +41,12 @@ async def login(request, socket, server, data):
         for chat_db in chats_db:
             data['chats'].append(chat_db.to_object())
 
-        chats_data = json.dumps(
-            data
-        )
+    else:
+        data = {"ok":False}
 
+    chats_data = json.dumps(data)
 
-        await server.send_data_to_user(chats_data.encode("utf-8"), user)
+    await server.send_data_to_socket(chats_data.encode("utf-8"), socket)
 
 
 async def register(request, socket, server, data):
