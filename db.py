@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, func
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -59,11 +61,20 @@ class Message(Base):
     text = Column(String)
 
     def to_object(self):
+
+        s = get_session()
+
+        sender = s.query(UserDB).filter(UserDB.id == self.sender_id).first()
+
+        chat = s.query(Chat).filter(Chat.id == self.chat_id).first()
+
         return {
             'id': self.id,
+            'sender': sender.username,
             'sender_id': self.sender_id,
+            'chat': chat.title,
             'chat_id': self.chat_id,
-            'send_time': self.send_time.isoformat(),
+            'send_time': f"{self.send_time.hour}:{self.send_time.minute}",
             'text': self.text
         }
 

@@ -91,6 +91,30 @@ async def join_chat(request, socket, server, data):
     # print(s.query(Chat).all())
 
 
+async def messages(request, socket, server, data):
+
+    if 'chat_id' in data:
+
+        s = get_session()
+
+        messages_db = s.query(Message).filter(Message.chat_id == data['chat_id'])
+
+        data = {
+            'oper': 'messages',
+            'ok': True,
+            'messages':[]}
+
+        for message in messages_db:
+            data['messages'].append(message.to_object())
+
+    else:
+        data = {"ok":False, "message": "Require chat_id"}
+
+    chats_data = json.dumps(data)
+
+    await server.send_data_to_socket(chats_data.encode("utf-8"), socket)
+
+
 async def send_message(request, socket, server, data):
 
     s = get_session()

@@ -8,6 +8,7 @@ routes = [
     {"req": "register", "func": register},
     {"req": "create-chat", "func": create_chat},
     {"req": "join-chat", "func": join_chat},
+    {"req": "messages", "func": messages},
     {"req": "send-message", "func": send_message},
 ]
 
