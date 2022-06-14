@@ -1,4 +1,5 @@
 import json
+import time
 
 from user import User
 
@@ -113,6 +114,24 @@ async def messages(request, socket, server, data):
     chats_data = json.dumps(data)
 
     await server.send_data_to_socket(chats_data.encode("utf-8"), socket)
+
+    for i in range (3):
+        time.sleep(3)
+
+        message_data = json.dumps({
+                "ok": True,
+                "oper": "new_message",
+                "message": {'sender': "USER",
+                            'id': 6 + i,
+                            'sender_id': "3",
+                            'chat': "wqwq",
+                            'chat_id': "1",
+                            'send_time': "23:33",
+                            'text': f"message{i}"
+                            }
+        })
+
+        await server.send_data_to_socket(message_data.encode("utf-8"), socket)
 
 
 async def send_message(request, socket, server, data):
