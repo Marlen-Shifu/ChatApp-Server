@@ -115,48 +115,40 @@ async def messages(request, socket, server, data):
 
     await server.send_data_to_socket(chats_data.encode("utf-8"), socket)
 
-    for i in range (3):
-        time.sleep(3)
-
-        message_data = json.dumps({
-                "ok": True,
-                "oper": "new_message",
-                "message": {'sender': "USER",
-                            'id': 6 + i,
-                            'sender_id': "3",
-                            'chat': "wqwq",
-                            'chat_id': "1",
-                            'send_time': "23:33",
-                            'text': f"message{i}"
-                            }
-        })
-
-        await server.send_data_to_socket(message_data.encode("utf-8"), socket)
 
 
-async def send_message(request, socket, server, data):
+async def send_message(message, socket, server):
+    message_data = json.dumps({
+        "ok": True,
+        "oper": "new_message",
+        "message": message.to_object()
+    })
+
+    await server.send_data_to_socket(message_data.encode("utf-8"), socket)
+
+
+
+async def new_message_recieve(request, socket, server, data):
 
     s = get_session()
 
-    new_object = Message(sender_id=data['id'], chat_id=data['chat_id'], text=data['text'])
+    new_object = Message(sender_id=data['sender_id'], chat_id=data['chat_id'], text=data['text'])
     s.add(new_object)
     s.flush()
 
-    data_to = json.dumps(new_object.to_object())
-
-    await server.send_data_to_socket(data_to.encode("utf-8"), socket)
     s.commit()
 
-    chat_users = s.query(ChatMember).filter_by(chat_id=int(data['chat_id'])).all()
-    print(chat_users)
+    await send_message(new_object, socket, server)
 
-    for user in chat_users:
-        userdb = s.query(UserDB).filter_by(id=user.user_id).first()
-        print(userdb.username)
-
-        connected_user = get_connected_user(server, username=userdb.username)
-        print(connected_user)
-
-        if connected_user != None:
-            await server.send_data_to_socket(data_to.encode("utf-8"), connected_user.socket)
+    # chat_users = s.query(ChatMember).filter_by(chat_id=int(data['chat_id'])).all()
+    # print(chat_users)
+    #
+    # for user in chat_users:
+    #     print(user.username)
+    #
+    #     connected_user = get_connected_user(server, username=user.username)
+    #     print(connected_user)
+    #
+    #     if connected_user != None:
+    #         await server.send_data_to_socket(data_to.encode("utf-8"), connected_user.socket)
 
